@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chord Palette</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   CSS Custom Properties & Theme
+   ═══════════════════════════════════════════ */
+:root {
+  --cream: #f5f0e8;
+  --paper: #ede8dc;
+  --ink: #1a1510;
+  --ink-faded: #5a4f3f;
+  --red: #c0392b;
+  --rule: #c8bfa8;
+  --rule-bright: #c8bfa8;
+  --card-bg: #f5f0e8;
+  --card-hover: #ede8dc;
+
+  --diagram-line: #1a1510;
+  --diagram-nut: #1a1510;
+  --diagram-dot: #1a1510;
+  --diagram-dot-text: #f5f0e8;
+  --diagram-open: #1a1510;
+  --diagram-mute: #5a4f3f;
+
+  --font-serif: 'Playfair Display', serif;
+  --font-sans: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+html.dark {
+  --cream: #0e0d0b;
+  --paper: #161410;
+  --ink: #c8b98a;
+  --ink-faded: #6b5e42;
+  --red: #d4a843;
+  --rule: #2e2a22;
+  --rule-bright: #3d3830;
+  --card-bg: #1c1a16;
+  --card-hover: #221f1a;
+
+  --diagram-line: #3d3830;
+  --diagram-nut: #c8b98a;
+  --diagram-dot: #c8b98a;
+  --diagram-dot-text: #0e0d0b;
+  --diagram-open: #c8b98a;
+  --diagram-mute: #6b5e42;
+}
+
+/* ═══════════════════════════════════════════
+   Reset & Base
+   ═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  color: var(--ink);
+  background: var(--cream);
+  min-height: 100vh;
+  transition: background 0.3s ease, color 0.3s ease;
+  line-height: 1.5;
+}
+
+/* Grain overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.6;
+}
+
+@media (max-width: 768px) {
+  body::before { display: none; }
+}
+
+/* ═══════════════════════════════════════════
+   Layout Container
+   ═══════════════════════════════════════════ */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+@media (max-width: 600px) {
+  .container { padding: 1.25rem 1rem 3rem; }
+}
+
+/* ═══════════════════════════════════════════
+   Header
+   ═══════════════════════════════════════════ */
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 1rem;
+}
+
+.header h1 {
+  font-family: var(--font-serif);
+  font-weight: 900;
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.header h1 span {
+  color: var(--red);
+}
+
+.dark-toggle {
+  background: none;
+  border: 1px solid var(--rule);
+  color: var(--ink-faded);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.dark-toggle:hover {
+  color: var(--ink);
+  border-color: var(--ink-faded);
+}
+
+/* ═══════════════════════════════════════════
+   Scale Selector
+   ═══════════════════════════════════════════ */
+.scale-selector {
+  margin-bottom: 2rem;
+}
+
+.selector-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-faded);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.root-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-bottom: 1rem;
+  border: 1px solid var(--rule);
+}
+
+.root-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0;
+  background: var(--card-bg);
+  border: none;
+  border-right: 1px solid var(--rule);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.root-btn:last-child { border-right: none; }
+
+.root-btn:hover {
+  background: var(--card-hover);
+}
+
+.root-btn.active {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+@media (max-width: 600px) {
+  .root-buttons {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .root-btn {
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 0.6rem 0;
+  }
+  .root-btn:nth-child(6) { border-right: none; }
+  .root-btn:nth-child(n+7) { border-bottom: none; }
+  .root-btn:last-child { border-right: none; }
+}
+
+.scale-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.scale-select {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.45rem 0.75rem;
+  background: var(--card-bg);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235a4f3f' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  padding-right: 2rem;
+}
+
+html.dark .scale-select {
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b5e42' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+.scale-label {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* ═══════════════════════════════════════════
+   Chord Grid
+   ═══════════════════════════════════════════ */
+.grid-section {
+  margin-bottom: 2rem;
+}
+
+.chord-grid {
+  display: grid;
+  grid-template-columns: auto repeat(7, 1fr);
+  border: 1px solid var(--rule);
+  overflow-x: auto;
+}
+
+.grid-header {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faded);
+  padding: 0.6rem 0.4rem;
+  text-align: center;
+  border-bottom: 1px solid var(--rule);
+  border-right: 1px solid var(--rule);
+  background: var(--paper);
+  white-space: nowrap;
+}
+
+.grid-header .roman {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.grid-header .note-name {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--ink-faded);
+  margin-top: 0.1rem;
+}
+
+.row-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faded);
+  padding: 0.5rem 0.6rem;
+  text-align: right;
+  border-bottom: 1px solid var(--rule);
+  border-right: 1px solid var(--rule);
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+
+.chord-cell {
+  padding: 0.4rem 0.2rem;
+  text-align: center;
+  border-bottom: 1px solid var(--rule);
+  border-right: 1px solid var(--rule);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.4rem;
+}
+
+.chord-grid > :nth-child(8n) { border-right: none; }
+.chord-grid > :nth-last-child(-n+8) { border-bottom: none; }
+
+.chord-cell:hover {
+  background: var(--card-hover);
+}
+
+.chord-cell.active {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+.chord-cell.active .cell-name {
+  color: var(--cream);
+}
+
+.chord-cell.empty {
+  cursor: default;
+  background: var(--paper);
+  opacity: 0.4;
+}
+
+.chord-cell.empty:hover {
+  background: var(--paper);
+}
+
+.cell-name {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+/* Triad row emphasis */
+.chord-cell.triad-row:not(.empty) {
+  min-height: 2.8rem;
+}
+
+.chord-cell.triad-row .cell-name {
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════
+   Chord Diagram
+   ═══════════════════════════════════════════ */
+.diagram-section {
+  margin-bottom: 2rem;
+  border: 1px solid var(--rule);
+  padding: 1.5rem;
+  display: none;
+}
+
+.diagram-section.visible {
+  display: block;
+}
+
+.diagram-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.diagram-chord-name {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.diagram-quality {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-faded);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.diagram-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.diagram-svg-wrap {
+  flex-shrink: 0;
+}
+
+.diagram-notes {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-faded);
+  margin-top: 1rem;
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════════
+   Progression Builder
+   ═══════════════════════════════════════════ */
+.progression-section {
+  border: 1px solid var(--rule);
+  padding: 1.25rem;
+}
+
+.progression-section .selector-label {
+  margin-bottom: 0.75rem;
+}
+
+.progression-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.progression-strip.empty-state {
+  justify-content: center;
+}
+
+.progression-strip.empty-state::after {
+  content: 'Click chords above to build a progression';
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-faded);
+  letter-spacing: 0.05em;
+}
+
+.chord-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.6rem;
+  background: var(--card-bg);
+  border: 1px solid var(--rule);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.chord-chip:hover {
+  background: var(--card-hover);
+}
+
+.chord-chip.playing {
+  background: var(--ink);
+  color: var(--cream);
+  border-color: var(--ink);
+}
+
+.chip-remove {
+  font-size: 0.65rem;
+  color: var(--ink-faded);
+  cursor: pointer;
+  padding: 0 0.1rem;
+  line-height: 1;
+}
+
+.chip-remove:hover {
+  color: var(--red);
+}
+
+.progression-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ctrl-btn {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.5rem 1rem;
+  background: var(--ink);
+  color: var(--cream);
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ctrl-btn:hover {
+  opacity: 0.85;
+}
+
+.ctrl-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ctrl-btn.stop-btn {
+  background: var(--red);
+}
+
+.ctrl-btn.clear-btn {
+  background: none;
+  color: var(--ink-faded);
+  border: 1px solid var(--rule);
+}
+
+.ctrl-btn.clear-btn:hover {
+  color: var(--ink);
+  border-color: var(--ink-faded);
+}
+
+.bpm-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.bpm-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-faded);
+  letter-spacing: 0.05em;
+  min-width: 5ch;
+  text-align: right;
+}
+
+.bpm-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100px;
+  height: 3px;
+  background: var(--rule);
+  outline: none;
+  cursor: pointer;
+}
+
+.bpm-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--ink);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.bpm-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: var(--ink);
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════
+   Loading State
+   ═══════════════════════════════════════════ */
+.loading-indicator {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-faded);
+  letter-spacing: 0.05em;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.loading-indicator.active {
+  animation: pulse 1.5s ease infinite;
+}
+
+/* ═══════════════════════════════════════════
+   Responsive
+   ═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .header h1 { font-size: 1.5rem; }
+  .scale-label { font-size: 1.1rem; }
+  .chord-grid { font-size: 0.85rem; }
+  .bpm-control { margin-left: 0; width: 100%; margin-top: 0.5rem; }
+}
+
+@media (max-width: 480px) {
+  .chord-grid {
+    grid-template-columns: auto repeat(7, minmax(38px, 1fr));
+  }
+  .cell-name { font-size: 0.6rem; }
+  .chord-cell.triad-row .cell-name { font-size: 0.7rem; }
+  .grid-header { font-size: 0.6rem; padding: 0.4rem 0.2rem; }
+  .grid-header .roman { font-size: 0.7rem; }
+  .row-label { font-size: 0.55rem; padding: 0.4rem 0.3rem; }
+  .diagram-section { padding: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <header class="header">
+    <h1>Chord <span>Palette</span></h1>
+    <button class="dark-toggle" id="darkToggle">Light</button>
+  </header>
+
+  <!-- Scale Selector -->
+  <section class="scale-selector">
+    <span class="selector-label">Root Note</span>
+    <div class="root-buttons" id="rootButtons"></div>
+    <div class="scale-row">
+      <select class="scale-select" id="scaleSelect"></select>
+      <span class="scale-label" id="scaleLabel">C Major</span>
+      <span class="loading-indicator" id="loadingIndicator">Loading samples...</span>
+    </div>
+  </section>
+
+  <!-- Chord Grid -->
+  <section class="grid-section">
+    <div class="chord-grid" id="chordGrid"></div>
+  </section>
+
+  <!-- Chord Diagram -->
+  <section class="diagram-section" id="diagramSection">
+    <div class="diagram-header">
+      <span class="diagram-chord-name" id="diagramName"></span>
+      <span class="diagram-quality" id="diagramQuality"></span>
+    </div>
+    <div class="diagram-container">
+      <div class="diagram-svg-wrap" id="diagramSvg"></div>
+    </div>
+    <div class="diagram-notes" id="diagramNotes"></div>
+  </section>
+
+  <!-- Progression Builder -->
+  <section class="progression-section">
+    <span class="selector-label">Progression</span>
+    <div class="progression-strip empty-state" id="progressionStrip"></div>
+    <div class="progression-controls">
+      <button class="ctrl-btn play-btn" id="playBtn" disabled>Play</button>
+      <button class="ctrl-btn stop-btn" id="stopBtn" disabled>Stop</button>
+      <button class="ctrl-btn clear-btn" id="clearBtn" disabled>Clear</button>
+      <div class="bpm-control">
+        <span class="bpm-label" id="bpmLabel">100 bpm</span>
+        <input type="range" class="bpm-slider" id="bpmSlider" min="40" max="200" value="100">
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.min.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   1. MUSIC THEORY ENGINE
+   ═══════════════════════════════════════════════════════════════ */
+const MusicTheory = (() => {
+  const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+  const SCALES = {
+    'Major':                [0,2,4,5,7,9,11],
+    'Natural Minor':        [0,2,3,5,7,8,10],
+    'Harmonic Minor':       [0,2,3,5,7,8,11],
+    'Melodic Minor':        [0,2,3,5,7,9,11],
+    'Harmonic Major':       [0,2,4,5,7,8,11],
+    'Double Harmonic Major':[0,1,4,5,7,8,11],
+    'Neapolitan Major':     [0,1,3,5,7,9,11],
+    'Neapolitan Minor':     [0,1,3,5,7,8,11],
+    'Dorian':               [0,2,3,5,7,9,10],
+    'Phrygian':             [0,1,3,5,7,8,10],
+    'Lydian':               [0,2,4,6,7,9,11],
+    'Mixolydian':           [0,2,4,5,7,9,10],
+    'Locrian':              [0,1,3,5,6,8,10],
+  };
+
+  const SCALE_GROUPS = {
+    'Common':   ['Major','Natural Minor'],
+    'Extended': ['Harmonic Minor','Melodic Minor','Harmonic Major','Double Harmonic Major','Neapolitan Major','Neapolitan Minor'],
+    'Modes':    ['Dorian','Phrygian','Lydian','Mixolydian','Locrian'],
+  };
+
+  const CHORD_FORMULAS = {
+    'maj':[0,4,7], 'min':[0,3,7], 'dim':[0,3,6], 'aug':[0,4,8],
+    'sus2':[0,2,7], 'sus4':[0,5,7],
+    'maj7':[0,4,7,11], 'min7':[0,3,7,10], 'dom7':[0,4,7,10],
+    'm7b5':[0,3,6,10], 'dim7':[0,3,6,9],
+    'minMaj7':[0,3,7,11], 'augMaj7':[0,4,8,11], 'aug7':[0,4,8,10],
+  };
+
+  const ROMAN = ['I','II','III','IV','V','VI','VII'];
+
+  // ─── Scale-degree-aware note spelling ───
+  // Each letter appears exactly once per 7-note scale
+  const LETTERS = ['C','D','E','F','G','A','B'];
+  const NATURAL_PC = [0, 2, 4, 5, 7, 9, 11]; // pitch class of each natural letter
+
+  // Map pitch class → letter index for root note
+  // Accidentals: Db(1), Eb(3), F#(6), Ab(8), Bb(10)
+  function rootLetterIndex(pc) {
+    const nat = {0:0, 2:1, 4:2, 5:3, 7:4, 9:5, 11:6};
+    if (nat[pc] !== undefined) return nat[pc];
+    const acc = {1:1, 3:2, 6:3, 8:5, 10:6}; // Db→D, Eb→E, F#→F, Ab→A, Bb→B
+    return acc[pc];
+  }
+
+  // Get properly-spelled note names for all 7 degrees of a scale
+  function getScaleNoteNames(rootPc, scaleType) {
+    const intervals = SCALES[scaleType];
+    const rli = rootLetterIndex(rootPc);
+    return intervals.map((interval, d) => {
+      const letterIdx = (rli + d) % 7;
+      const naturalPc = NATURAL_PC[letterIdx];
+      const actualPc = (rootPc + interval) % 12;
+      const diff = (actualPc - naturalPc + 12) % 12;
+      const letter = LETTERS[letterIdx];
+      if (diff === 0) return letter;
+      if (diff === 1) return letter + '#';
+      if (diff === 11) return letter + 'b';
+      if (diff === 2) return letter + '##';
+      if (diff === 10) return letter + 'bb';
+      return letter;
+    });
+  }
+
+  // Get properly-spelled root name
+  function getRootName(pc) {
+    const li = rootLetterIndex(pc);
+    const naturalPc = NATURAL_PC[li];
+    const diff = (pc - naturalPc + 12) % 12;
+    const letter = LETTERS[li];
+    if (diff === 1) return letter + '#';
+    if (diff === 11) return letter + 'b';
+    return letter;
+  }
+
+  // Get absolute pitch classes for a scale
+  function getScalePitchClasses(rootPc, scaleType) {
+    return SCALES[scaleType].map(i => (rootPc + i) % 12);
+  }
+
+  // Derive triad quality for a scale degree
+  function getTriadQuality(rootPc, scaleType, degree) {
+    const intervals = SCALES[scaleType];
+    const root = (rootPc + intervals[degree]) % 12;
+    const third = (rootPc + intervals[(degree + 2) % 7]) % 12;
+    const fifth = (rootPc + intervals[(degree + 4) % 7]) % 12;
+    const i3 = (third - root + 12) % 12;
+    const i5 = (fifth - root + 12) % 12;
+    if (i3 === 4 && i5 === 7) return 'maj';
+    if (i3 === 3 && i5 === 7) return 'min';
+    if (i3 === 3 && i5 === 6) return 'dim';
+    if (i3 === 4 && i5 === 8) return 'aug';
+    return 'maj';
+  }
+
+  // Derive 7th chord quality
+  function get7thQuality(rootPc, scaleType, degree) {
+    const triad = getTriadQuality(rootPc, scaleType, degree);
+    const intervals = SCALES[scaleType];
+    const root = (rootPc + intervals[degree]) % 12;
+    const seventh = (rootPc + intervals[(degree + 6) % 7]) % 12;
+    const i7 = (seventh - root + 12) % 12;
+    if (triad === 'maj' && i7 === 11) return 'maj7';
+    if (triad === 'maj' && i7 === 10) return 'dom7';
+    if (triad === 'min' && i7 === 10) return 'min7';
+    if (triad === 'min' && i7 === 11) return 'minMaj7';
+    if (triad === 'dim' && i7 === 10) return 'm7b5';
+    if (triad === 'dim' && i7 === 9) return 'dim7';
+    if (triad === 'aug' && i7 === 11) return 'augMaj7';
+    if (triad === 'aug' && i7 === 10) return 'aug7';
+    return 'dom7';
+  }
+
+  // Check if sus chord is diatonic
+  function isSusDiatonic(rootPc, scaleType, degree, susType) {
+    const pcs = getScalePitchClasses(rootPc, scaleType);
+    const intervals = SCALES[scaleType];
+    const chordRoot = (rootPc + intervals[degree]) % 12;
+    return CHORD_FORMULAS[susType].every(i => pcs.includes((chordRoot + i) % 12));
+  }
+
+  // Roman numeral display
+  function romanNumeral(degree, quality) {
+    let r = ROMAN[degree];
+    if (['min','dim','min7','m7b5','dim7','minMaj7'].includes(quality)) r = r.toLowerCase();
+    if (quality === 'dim') r += '\u00B0';
+    if (quality === 'aug') r += '+';
+    return r;
+  }
+
+  // Chord name suffix
+  function chordSuffix(quality) {
+    const map = {
+      'maj':'', 'min':'m', 'dim':'dim', 'aug':'aug',
+      'sus2':'sus2', 'sus4':'sus4',
+      'maj7':'maj7', 'min7':'m7', 'dom7':'7',
+      'm7b5':'m7\u266D5', 'dim7':'dim7',
+      'minMaj7':'m(maj7)', 'augMaj7':'aug(maj7)', 'aug7':'aug7',
+    };
+    return map[quality] || quality;
+  }
+
+  // Build the full grid data
+  function buildGrid(rootPc, scaleType) {
+    const intervals = SCALES[scaleType];
+    const noteNames = getScaleNoteNames(rootPc, scaleType);
+    const degrees = [];
+
+    for (let d = 0; d < 7; d++) {
+      const degreePc = (rootPc + intervals[d]) % 12;
+      const triadQ = getTriadQuality(rootPc, scaleType, d);
+      const seventhQ = get7thQuality(rootPc, scaleType, d);
+
+      degrees.push({
+        degree: d,
+        pc: degreePc,
+        note: noteNames[d],
+        roman: romanNumeral(d, triadQ),
+        triad: triadQ,
+        seventh: seventhQ,
+        sus2: isSusDiatonic(rootPc, scaleType, d, 'sus2') ? 'sus2' : null,
+        sus4: isSusDiatonic(rootPc, scaleType, d, 'sus4') ? 'sus4' : null,
+      });
+    }
+    return degrees;
+  }
+
+  return {
+    NOTE_NAMES, SCALES, SCALE_GROUPS, CHORD_FORMULAS, ROMAN,
+    getRootName, getScaleNoteNames, getScalePitchClasses,
+    buildGrid, chordSuffix, getTriadQuality, get7thQuality,
+  };
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════
+   2. VOICING ENGINE
+   ═══════════════════════════════════════════════════════════════ */
+const VoicingEngine = (() => {
+  // Standard tuning MIDI: E2=40, A2=45, D3=50, G3=55, B3=59, E4=64
+  const TUNING = [40, 45, 50, 55, 59, 64];
+
+  // Known voicings for common chords: key = "quality_pitchClass"
+  // Frets: -1=muted, 0=open, 1+=fret number
+  // Strings: [E2, A2, D3, G3, B3, E4] (low to high)
+  const KNOWN = {
+    // ─── MAJOR ───
+    'maj_0':  [-1,3,2,0,1,0],     // C
+    'maj_1':  [-1,4,6,6,6,4],     // C#/Db (A-barre)
+    'maj_2':  [-1,-1,0,2,3,2],    // D
+    'maj_3':  [-1,-1,1,3,4,3],    // Eb (D-shape+1)
+    'maj_4':  [0,2,2,1,0,0],      // E
+    'maj_5':  [1,3,3,2,1,1],      // F (E-barre)
+    'maj_6':  [2,4,4,3,2,2],      // F# (E-barre+2)
+    'maj_7':  [3,2,0,0,0,3],      // G
+    'maj_8':  [4,6,6,5,4,4],      // Ab (E-barre+4)
+    'maj_9':  [-1,0,2,2,2,0],     // A
+    'maj_10': [-1,1,3,3,3,1],     // Bb (A-barre+1)
+    'maj_11': [-1,2,4,4,4,2],     // B (A-barre+2)
+
+    // ─── MINOR ───
+    'min_0':  [-1,3,5,5,4,3],     // Cm (A-barre)
+    'min_1':  [-1,4,6,6,5,4],     // C#m
+    'min_2':  [-1,-1,0,2,3,1],    // Dm
+    'min_3':  [-1,-1,1,3,4,2],    // Ebm
+    'min_4':  [0,2,2,0,0,0],      // Em
+    'min_5':  [1,3,3,1,1,1],      // Fm (E-barre)
+    'min_6':  [2,4,4,2,2,2],      // F#m
+    'min_7':  [3,5,5,3,3,3],      // Gm (E-barre)
+    'min_8':  [4,6,6,4,4,4],      // G#m
+    'min_9':  [-1,0,2,2,1,0],     // Am
+    'min_10': [-1,1,3,3,2,1],     // Bbm (A-barre)
+    'min_11': [-1,2,4,4,3,2],     // Bm (A-barre)
+
+    // ─── DOMINANT 7 ───
+    'dom7_0':  [-1,3,2,3,1,0],    // C7
+    'dom7_1':  [-1,4,3,4,2,-1],   // C#7
+    'dom7_2':  [-1,-1,0,2,1,2],   // D7
+    'dom7_3':  [-1,-1,1,3,2,3],   // Eb7
+    'dom7_4':  [0,2,0,1,0,0],     // E7
+    'dom7_5':  [1,3,1,2,1,1],     // F7
+    'dom7_6':  [2,4,2,3,2,2],     // F#7
+    'dom7_7':  [3,2,0,0,0,1],     // G7
+    'dom7_8':  [4,6,4,5,4,4],     // Ab7
+    'dom7_9':  [-1,0,2,0,2,0],    // A7
+    'dom7_10': [-1,1,3,1,3,1],    // Bb7
+    'dom7_11': [-1,2,1,2,0,2],    // B7
+
+    // ─── MAJOR 7 ───
+    'maj7_0':  [-1,3,2,0,0,0],    // Cmaj7
+    'maj7_1':  [-1,4,3,1,1,1],    // C#maj7
+    'maj7_2':  [-1,-1,0,2,2,2],   // Dmaj7
+    'maj7_3':  [-1,-1,1,3,3,3],   // Ebmaj7
+    'maj7_4':  [0,2,1,1,0,0],     // Emaj7
+    'maj7_5':  [1,3,3,2,1,0],     // Fmaj7
+    'maj7_6':  [2,4,3,3,2,2],     // F#maj7
+    'maj7_7':  [3,2,0,0,0,2],     // Gmaj7
+    'maj7_8':  [4,6,5,5,4,4],     // Abmaj7
+    'maj7_9':  [-1,0,2,1,2,0],    // Amaj7
+    'maj7_10': [-1,1,3,2,3,1],    // Bbmaj7
+    'maj7_11': [-1,2,4,3,4,2],    // Bmaj7
+
+    // ─── MINOR 7 ───
+    'min7_0':  [-1,3,5,3,4,3],    // Cm7
+    'min7_1':  [-1,4,6,4,5,4],    // C#m7
+    'min7_2':  [-1,-1,0,2,1,1],   // Dm7
+    'min7_3':  [-1,-1,1,3,2,2],   // Ebm7
+    'min7_4':  [0,2,0,0,0,0],     // Em7
+    'min7_5':  [1,3,1,1,1,1],     // Fm7
+    'min7_6':  [2,4,2,2,2,2],     // F#m7
+    'min7_7':  [3,5,3,3,3,3],     // Gm7
+    'min7_8':  [4,6,4,4,4,4],     // G#m7
+    'min7_9':  [-1,0,2,0,1,0],    // Am7
+    'min7_10': [-1,1,3,1,2,1],    // Bbm7
+    'min7_11': [-1,2,0,2,0,2],    // Bm7
+
+    // ─── SUS2 ───
+    'sus2_2':  [-1,-1,0,2,3,0],   // Dsus2
+    'sus2_4':  [0,2,4,4,0,0],     // Esus2
+    'sus2_9':  [-1,0,2,2,0,0],    // Asus2
+
+    // ─── SUS4 ───
+    'sus4_2':  [-1,-1,0,2,3,3],   // Dsus4
+    'sus4_4':  [0,2,2,2,0,0],     // Esus4
+    'sus4_9':  [-1,0,2,2,3,0],    // Asus4
+  };
+
+  // Barre templates for transposition fallback
+  // E-shape and A-shape barre patterns
+  const BARRE_TEMPLATES = {
+    'maj':     [{ shape: [0,2,2,1,0,0], rs: 0 }, { shape: [-1,0,2,2,2,0], rs: 1 }],
+    'min':     [{ shape: [0,2,2,0,0,0], rs: 0 }, { shape: [-1,0,2,2,1,0], rs: 1 }],
+    'dim':     [{ shape: [-1,-1,0,1,0,1], rs: 2 }, { shape: [-1,0,1,2,1,-1], rs: 1 }],
+    'aug':     [{ shape: [-1,0,3,2,2,1], rs: 1 }],
+    'sus2':    [{ shape: [-1,0,2,2,0,0], rs: 1 }, { shape: [0,2,4,4,0,0], rs: 0 }],
+    'sus4':    [{ shape: [-1,0,2,2,3,0], rs: 1 }, { shape: [0,2,2,2,0,0], rs: 0 }],
+    'maj7':    [{ shape: [-1,0,2,1,2,0], rs: 1 }, { shape: [0,2,1,1,0,0], rs: 0 }],
+    'min7':    [{ shape: [-1,0,2,0,1,0], rs: 1 }, { shape: [0,2,0,0,0,0], rs: 0 }],
+    'dom7':    [{ shape: [-1,0,2,0,2,0], rs: 1 }, { shape: [0,2,0,1,0,0], rs: 0 }],
+    'm7b5':    [{ shape: [-1,0,1,0,1,0], rs: 1 }, { shape: [-1,-1,0,1,1,1], rs: 2 }],
+    'dim7':    [{ shape: [-1,0,1,2,1,2], rs: 1 }, { shape: [-1,-1,0,1,0,1], rs: 2 }],
+    'minMaj7': [{ shape: [-1,0,2,1,1,0], rs: 1 }, { shape: [0,2,1,0,0,0], rs: 0 }],
+    'augMaj7': [{ shape: [-1,0,3,2,2,0], rs: 1 }],
+    'aug7':    [{ shape: [-1,0,3,0,2,1], rs: 1 }],
+  };
+
+  function transposeTemplate(tmpl, targetPc) {
+    const rootMidi = TUNING[tmpl.rs] + tmpl.shape[tmpl.rs];
+    const rootPc = rootMidi % 12;
+    const shift = (targetPc - rootPc + 12) % 12;
+    return tmpl.shape.map((f, i) => f === -1 ? -1 : f + shift);
+  }
+
+  function validateVoicing(frets) {
+    const played = frets.filter(f => f > 0);
+    if (played.length === 0) return true;
+    const maxFret = Math.max(...played);
+    const minFret = Math.min(...played);
+    if (maxFret > 18) return false;
+    if (maxFret - minFret > 4) return false;
+    if (played.length > 6) return false;
+    return true;
+  }
+
+  function scoreVoicing(frets) {
+    const fretted = frets.filter(f => f > 0);
+    const maxFret = fretted.length ? Math.max(...fretted) : 0;
+    const openCount = frets.filter(f => f === 0).length;
+    const playedCount = frets.filter(f => f >= 0).length;
+    let score = maxFret * 2 - playedCount * 3 - openCount * 2;
+    if (fretted.length > 1) {
+      score += (Math.max(...fretted) - Math.min(...fretted)) * 1.5;
+    }
+    return score;
+  }
+
+  function getVoicing(quality, targetPc) {
+    // 1. Check known voicings first
+    const key = quality + '_' + targetPc;
+    if (KNOWN[key]) return [...KNOWN[key]];
+
+    // 2. Fallback: transpose barre templates
+    const templates = BARRE_TEMPLATES[quality];
+    if (!templates) return null;
+
+    let best = null;
+    let bestScore = Infinity;
+    for (const tmpl of templates) {
+      const frets = transposeTemplate(tmpl, targetPc);
+      if (!validateVoicing(frets)) continue;
+      const s = scoreVoicing(frets);
+      if (s < bestScore) { bestScore = s; best = frets; }
+    }
+    return best;
+  }
+
+  function fretsToMidi(frets) {
+    return frets.map((f, i) => f === -1 ? null : TUNING[i] + f);
+  }
+
+  function midiToNoteName(midi) {
+    const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[midi % 12] + (Math.floor(midi / 12) - 1);
+  }
+
+  function getDiagramData(frets) {
+    const played = frets.filter(f => f > 0);
+    if (played.length === 0) {
+      return { displayFrets: frets, baseFret: 1, showNut: true };
+    }
+    const minFret = Math.min(...played);
+    const maxFret = Math.max(...played);
+    if (maxFret <= 5) {
+      return { displayFrets: frets, baseFret: 1, showNut: true };
+    }
+    const base = minFret;
+    const df = frets.map(f => f <= 0 ? f : f - base + 1);
+    return { displayFrets: df, baseFret: base, showNut: false };
+  }
+
+  return { TUNING, getVoicing, fretsToMidi, midiToNoteName, getDiagramData };
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════
+   3. AUDIO ENGINE
+   ═══════════════════════════════════════════════════════════════ */
+const AudioEngine = (() => {
+  let sampler = null;
+  let loaded = false;
+  let loading = false;
+  let onLoadCallback = null;
+
+  function init(onLoad) {
+    if (loaded) { onLoad?.(); return; }
+    if (loading) { onLoadCallback = onLoad; return; }
+    loading = true;
+    onLoadCallback = onLoad;
+
+    sampler = new Tone.Sampler({
+      urls: {
+        'A2': 'A2.mp3', 'C3': 'C3.mp3', 'D#3': 'Ds3.mp3', 'F#3': 'Fs3.mp3',
+        'A3': 'A3.mp3', 'C4': 'C4.mp3', 'D#4': 'Ds4.mp3', 'F#4': 'Fs4.mp3',
+        'A4': 'A4.mp3', 'C5': 'C5.mp3',
+      },
+      baseUrl: 'https://cdn.jsdelivr.net/gh/nbrosowsky/tonejs-instruments/samples/guitar-acoustic/',
+      release: 1.5,
+      onload: () => {
+        loaded = true;
+        loading = false;
+        sampler.volume.value = -6;
+        onLoadCallback?.();
+      },
+      onerror: (e) => {
+        console.error('Sample load error:', e);
+        loading = false;
+      }
+    }).toDestination();
+  }
+
+  async function ensureReady() {
+    await Tone.start();
+    if (!loaded) {
+      return new Promise(resolve => { init(resolve); });
+    }
+  }
+
+  // Strum a chord (array of MIDI notes, some may be null)
+  async function strumChord(midiNotes) {
+    await ensureReady();
+    const now = Tone.now();
+    const strumDelay = 0.018;
+    const notes = midiNotes.filter(n => n !== null);
+    notes.forEach((midi, i) => {
+      sampler.triggerAttackRelease(
+        VoicingEngine.midiToNoteName(midi), '2n', now + i * strumDelay
+      );
+    });
+  }
+
+  // Schedule a chord for progression playback
+  function scheduleChord(midiNotes, time) {
+    const notes = midiNotes.filter(n => n !== null);
+    const strumDelay = 0.018;
+    notes.forEach((midi, i) => {
+      sampler.triggerAttackRelease(
+        VoicingEngine.midiToNoteName(midi), '2n', time + i * strumDelay
+      );
+    });
+  }
+
+  function isLoaded() { return loaded; }
+  function getSampler() { return sampler; }
+
+  return { init, ensureReady, strumChord, scheduleChord, isLoaded, getSampler };
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════
+   4. APP STATE
+   ═══════════════════════════════════════════════════════════════ */
+const AppState = (() => {
+  const state = {
+    rootPc: 0,          // C
+    scaleType: 'Major',
+    activeChord: null,   // { degree, quality, name, frets, midi }
+    progression: [],     // array of { name, quality, frets, midi }
+    bpm: 100,
+    isPlaying: false,
+    darkMode: false,
+  };
+
+  const listeners = new Set();
+
+  function get() { return state; }
+
+  function set(updates) {
+    Object.assign(state, updates);
+    listeners.forEach(fn => fn(state));
+  }
+
+  function subscribe(fn) {
+    listeners.add(fn);
+    return () => listeners.delete(fn);
+  }
+
+  return { get, set, subscribe };
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════
+   5. CHORD DIAGRAM (SVG)
+   ═══════════════════════════════════════════════════════════════ */
+const ChordDiagram = (() => {
+  const STRINGS = 6;
+  const FRETS = 5;
+  const stringSpacing = 24;
+  const fretSpacing = 30;
+  const dotRadius = 8;
+  const fontSize = 12;
+  const topPad = 28;
+  const leftPad = 32;
+  const nutWidth = 4;
+
+  function render(frets) {
+    if (!frets) return '';
+
+    const { displayFrets, baseFret, showNut } = VoicingEngine.getDiagramData(frets);
+    const diagramW = (STRINGS - 1) * stringSpacing;
+    const diagramH = FRETS * fretSpacing;
+    const svgW = leftPad + diagramW + 16;
+    const svgH = topPad + diagramH + 12;
+
+    let svg = `<svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg" style="max-width:260px;">`;
+
+    // Nut or fret position
+    if (showNut) {
+      svg += `<rect x="${leftPad - 1}" y="${topPad - nutWidth}" width="${diagramW + 2}" height="${nutWidth}" rx="1" fill="var(--diagram-nut)"/>`;
+    } else {
+      svg += `<text x="${leftPad - 10}" y="${topPad + fretSpacing / 2 + 4}" text-anchor="middle" font-size="${fontSize}" font-family="var(--font-mono)" fill="var(--diagram-mute)">${baseFret}</text>`;
+    }
+
+    // Fret lines
+    for (let f = 0; f <= FRETS; f++) {
+      const y = topPad + f * fretSpacing;
+      svg += `<line x1="${leftPad}" y1="${y}" x2="${leftPad + diagramW}" y2="${y}" stroke="var(--diagram-line)" stroke-width="0.8"/>`;
+    }
+
+    // String lines
+    for (let s = 0; s < STRINGS; s++) {
+      const x = leftPad + s * stringSpacing;
+      const sw = (s === 0 || s === 5) ? 1.5 : 1;
+      svg += `<line x1="${x}" y1="${topPad}" x2="${x}" y2="${topPad + diagramH}" stroke="var(--diagram-line)" stroke-width="${sw}"/>`;
+    }
+
+    // Open / muted indicators + finger dots
+    for (let s = 0; s < STRINGS; s++) {
+      const x = leftPad + s * stringSpacing;
+      const fret = displayFrets[s];
+
+      if (fret === -1) {
+        // Muted
+        svg += `<text x="${x}" y="${topPad - 10}" text-anchor="middle" font-size="${fontSize}" font-family="var(--font-mono)" fill="var(--diagram-mute)">\u00D7</text>`;
+      } else if (fret === 0) {
+        // Open
+        svg += `<circle cx="${x}" cy="${topPad - 14 + 4}" r="${dotRadius * 0.6}" fill="none" stroke="var(--diagram-open)" stroke-width="1.2"/>`;
+      } else {
+        // Finger dot
+        const cy = topPad + (fret - 0.5) * fretSpacing;
+        svg += `<circle cx="${x}" cy="${cy}" r="${dotRadius}" fill="var(--diagram-dot)"/>`;
+      }
+    }
+
+    svg += `</svg>`;
+    return svg;
+  }
+
+  return { render };
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════
+   6. CHORD GRID RENDERER
+   ═══════════════════════════════════════════════════════════════ */
+const ChordGrid = (() => {
+  const gridEl = document.getElementById('chordGrid');
+
+  function render() {
+    const { rootPc, scaleType } = AppState.get();
+    const degrees = MusicTheory.buildGrid(rootPc, scaleType);
+
+    let html = '';
+
+    // Header row: empty corner + 7 degree headers
+    html += `<div class="grid-header" style="background:var(--paper);"></div>`;
+    degrees.forEach(d => {
+      html += `<div class="grid-header"><span class="roman">${d.roman}</span><span class="note-name">${d.note}</span></div>`;
+    });
+
+    // Row definitions: [rowLabel, qualityKey]
+    const rows = [
+      ['sus2', 'sus2'],
+      ['Triad', 'triad'],
+      ['sus4', 'sus4'],
+      ['7th', 'seventh'],
+    ];
+
+    rows.forEach(([label, key]) => {
+      const isTriad = key === 'triad';
+      html += `<div class="row-label">${label}</div>`;
+
+      degrees.forEach(d => {
+        let quality = null;
+        let isEmpty = false;
+
+        if (key === 'sus2') {
+          quality = d.sus2; // 'sus2' or null
+          isEmpty = !quality;
+        } else if (key === 'sus4') {
+          quality = d.sus4;
+          isEmpty = !quality;
+        } else if (key === 'triad') {
+          quality = d.triad;
+        } else if (key === 'seventh') {
+          quality = d.seventh;
+        }
+
+        if (isEmpty) {
+          html += `<div class="chord-cell empty ${isTriad ? 'triad-row' : ''}"><span class="cell-name">\u2014</span></div>`;
+        } else {
+          const suffix = MusicTheory.chordSuffix(quality);
+          const name = d.note + suffix;
+          html += `<div class="chord-cell ${isTriad ? 'triad-row' : ''}" data-degree="${d.degree}" data-quality="${quality}" data-pc="${d.pc}" data-name="${name}"><span class="cell-name">${name}</span></div>`;
+        }
+      });
+    });
+
+    gridEl.innerHTML = html;
+    updateActiveHighlight();
+  }
+
+  function updateActiveHighlight() {
+    const { activeChord } = AppState.get();
+    gridEl.querySelectorAll('.chord-cell').forEach(cell => {
+      cell.classList.remove('active');
+      if (activeChord && cell.dataset.name === activeChord.name && cell.dataset.quality === activeChord.quality) {
+        cell.classList.add('active');
+      }
+    });
+  }
+
+  // Click handler
+  gridEl.addEventListener('click', (e) => {
+    const cell = e.target.closest('.chord-cell:not(.empty)');
+    if (!cell) return;
+
+    const quality = cell.dataset.quality;
+    const pc = parseInt(cell.dataset.pc);
+    const name = cell.dataset.name;
+    const degree = parseInt(cell.dataset.degree);
+
+    const frets = VoicingEngine.getVoicing(quality, pc);
+    if (!frets) return;
+
+    const midi = VoicingEngine.fretsToMidi(frets);
+    const chord = { degree, quality, name, frets, midi, pc };
+
+    // Batch update: set active chord + add to progression in one go
+    const { progression } = AppState.get();
+    AppState.set({
+      activeChord: chord,
+      progression: [...progression, { name, quality, frets, midi, pc }],
+    });
+
+    // Play chord
+    AudioEngine.strumChord(midi);
+  });
+
+  return { render, updateActiveHighlight };
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════
+   7. DIAGRAM DISPLAY
+   ═══════════════════════════════════════════════════════════════ */
+const DiagramDisplay = (() => {
+  const section = document.getElementById('diagramSection');
+  const nameEl = document.getElementById('diagramName');
+  const qualityEl = document.getElementById('diagramQuality');
+  const svgEl = document.getElementById('diagramSvg');
+  const notesEl = document.getElementById('diagramNotes');
+
+  function update(state) {
+    const { activeChord } = state;
+    if (!activeChord) {
+      section.classList.remove('visible');
+      return;
+    }
+
+    section.classList.add('visible');
+    nameEl.textContent = activeChord.name;
+    qualityEl.textContent = activeChord.quality;
+    svgEl.innerHTML = ChordDiagram.render(activeChord.frets);
+
+    // Show note names
+    const midi = activeChord.midi;
+    const noteNames = midi
+      .filter(n => n !== null)
+      .map(n => VoicingEngine.midiToNoteName(n));
+    notesEl.textContent = noteNames.join(' \u2013 ');
+  }
+
+  return { update };
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════
+   8. PROGRESSION BUILDER
+   ═══════════════════════════════════════════════════════════════ */
+const ProgressionBuilder = (() => {
+  const strip = document.getElementById('progressionStrip');
+  const playBtn = document.getElementById('playBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const bpmSlider = document.getElementById('bpmSlider');
+  const bpmLabel = document.getElementById('bpmLabel');
+
+  let playbackIndex = -1;
+  let scheduledEvents = [];
+
+  function renderStrip() {
+    const { progression, isPlaying } = AppState.get();
+
+    if (progression.length === 0) {
+      strip.innerHTML = '';
+      strip.classList.add('empty-state');
+      playBtn.disabled = true;
+      stopBtn.disabled = true;
+      clearBtn.disabled = true;
+      return;
+    }
+
+    strip.classList.remove('empty-state');
+    playBtn.disabled = isPlaying;
+    stopBtn.disabled = !isPlaying;
+    clearBtn.disabled = false;
+
+    let html = '';
+    progression.forEach((chord, i) => {
+      const playing = i === playbackIndex ? ' playing' : '';
+      html += `<div class="chord-chip${playing}" data-index="${i}">
+        <span>${chord.name}</span>
+        <span class="chip-remove" data-remove="${i}">\u2715</span>
+      </div>`;
+    });
+    strip.innerHTML = html;
+  }
+
+  // Remove chip
+  strip.addEventListener('click', (e) => {
+    const removeBtn = e.target.closest('.chip-remove');
+    if (removeBtn) {
+      e.stopPropagation();
+      const idx = parseInt(removeBtn.dataset.remove);
+      const { progression } = AppState.get();
+      const newProg = [...progression];
+      newProg.splice(idx, 1);
+      AppState.set({ progression: newProg });
+      return;
+    }
+
+    // Click chip to replay
+    const chip = e.target.closest('.chord-chip');
+    if (chip && !AppState.get().isPlaying) {
+      const idx = parseInt(chip.dataset.index);
+      const chord = AppState.get().progression[idx];
+      if (chord) {
+        AudioEngine.strumChord(chord.midi);
+      }
+    }
+  });
+
+  // BPM
+  bpmSlider.addEventListener('input', () => {
+    const bpm = parseInt(bpmSlider.value);
+    bpmLabel.textContent = bpm + ' bpm';
+    AppState.set({ bpm });
+    if (AppState.get().isPlaying) {
+      Tone.Transport.bpm.value = bpm;
+    }
+  });
+
+  // Play progression
+  playBtn.addEventListener('click', async () => {
+    const { progression, bpm } = AppState.get();
+    if (progression.length === 0) return;
+
+    await AudioEngine.ensureReady();
+    stopPlayback();
+
+    AppState.set({ isPlaying: true });
+
+    Tone.Transport.cancel();
+    Tone.Transport.stop();
+    Tone.Transport.bpm.value = bpm;
+    Tone.Transport.position = 0;
+
+    // Schedule each chord using bar notation (e.g. "0:0:0", "1:0:0", etc.)
+    progression.forEach((chord, i) => {
+      const eventId = Tone.Transport.schedule((t) => {
+        AudioEngine.scheduleChord(chord.midi, t);
+        Tone.Draw.schedule(() => {
+          playbackIndex = i;
+          renderStrip();
+        }, t);
+      }, `${i}:0:0`);
+      scheduledEvents.push(eventId);
+    });
+
+    // Schedule stop after last chord (give it 1 bar to ring out)
+    const stopEvent = Tone.Transport.schedule((t) => {
+      Tone.Draw.schedule(() => {
+        stopPlayback();
+      }, t);
+    }, `${progression.length}:0:0`);
+    scheduledEvents.push(stopEvent);
+
+    Tone.Transport.start();
+  });
+
+  // Stop
+  stopBtn.addEventListener('click', () => {
+    stopPlayback();
+  });
+
+  function stopPlayback() {
+    Tone.Transport.stop();
+    Tone.Transport.cancel();
+    scheduledEvents = [];
+    playbackIndex = -1;
+    AppState.set({ isPlaying: false });
+  }
+
+  // Clear
+  clearBtn.addEventListener('click', () => {
+    stopPlayback();
+    AppState.set({ progression: [], activeChord: null });
+  });
+
+  return { renderStrip, stopPlayback };
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════
+   9. APP ORCHESTRATOR
+   ═══════════════════════════════════════════════════════════════ */
+const App = (() => {
+  const rootButtonsEl = document.getElementById('rootButtons');
+  const scaleSelectEl = document.getElementById('scaleSelect');
+  const scaleLabelEl = document.getElementById('scaleLabel');
+  const darkToggleEl = document.getElementById('darkToggle');
+  const loadingEl = document.getElementById('loadingIndicator');
+
+  function initRootButtons() {
+    MusicTheory.NOTE_NAMES.forEach((note, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'root-btn' + (i === 0 ? ' active' : '');
+      btn.textContent = note;
+      btn.dataset.pc = i;
+      rootButtonsEl.appendChild(btn);
+    });
+
+    rootButtonsEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('.root-btn');
+      if (!btn) return;
+      rootButtonsEl.querySelectorAll('.root-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      AppState.set({ rootPc: parseInt(btn.dataset.pc), activeChord: null });
+    });
+  }
+
+  function initScaleSelect() {
+    Object.entries(MusicTheory.SCALE_GROUPS).forEach(([group, scales]) => {
+      const optgroup = document.createElement('optgroup');
+      optgroup.label = group;
+      scales.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        optgroup.appendChild(opt);
+      });
+      scaleSelectEl.appendChild(optgroup);
+    });
+
+    scaleSelectEl.addEventListener('change', () => {
+      AppState.set({ scaleType: scaleSelectEl.value, activeChord: null });
+    });
+  }
+
+  function initDarkMode() {
+    // Check saved preference
+    const saved = localStorage.getItem('chordPaletteDark');
+    if (saved === 'true') {
+      document.documentElement.classList.add('dark');
+      AppState.set({ darkMode: true });
+      darkToggleEl.textContent = 'Dark';
+    }
+
+    darkToggleEl.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      AppState.set({ darkMode: isDark });
+      darkToggleEl.textContent = isDark ? 'Dark' : 'Light';
+      localStorage.setItem('chordPaletteDark', isDark);
+    });
+  }
+
+  function updateScaleLabel() {
+    const { rootPc, scaleType } = AppState.get();
+    const rootName = MusicTheory.getRootName(rootPc);
+    scaleLabelEl.textContent = rootName + ' ' + scaleType;
+  }
+
+  function initAudio() {
+    loadingEl.classList.add('active');
+    AudioEngine.init(() => {
+      loadingEl.textContent = 'Ready';
+      loadingEl.classList.remove('active');
+      setTimeout(() => { loadingEl.style.display = 'none'; }, 1500);
+    });
+  }
+
+  // State change handler
+  AppState.subscribe((state) => {
+    updateScaleLabel();
+    ChordGrid.render();
+    DiagramDisplay.update(state);
+    ProgressionBuilder.renderStrip();
+  });
+
+  function init() {
+    initRootButtons();
+    initScaleSelect();
+    initDarkMode();
+    initAudio();
+
+    // Initial render
+    updateScaleLabel();
+    ChordGrid.render();
+    DiagramDisplay.update(AppState.get());
+    ProgressionBuilder.renderStrip();
+  }
+
+  return { init };
+})();
+
+// Boot
+document.addEventListener('DOMContentLoaded', App.init);
+</script>
+</body>
+</html>
