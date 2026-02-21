@@ -419,6 +419,30 @@ html.dark .scale-select {
   text-align: center;
 }
 
+.add-to-progression {
+  display: block;
+  margin: 1rem auto 0;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.55rem 1.25rem;
+  background: var(--ink);
+  color: var(--cream);
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.add-to-progression:hover {
+  opacity: 0.85;
+}
+
+.add-to-progression:active {
+  transform: scale(0.97);
+}
+
 /* ═══════════════════════════════════════════
    Progression Builder
    ═══════════════════════════════════════════ */
@@ -448,7 +472,7 @@ html.dark .scale-select {
 }
 
 .progression-strip.empty-state::after {
-  content: 'Click chords above to build a progression';
+  content: 'Select a chord, then press + Add to build a progression';
   font-family: var(--font-mono);
   font-size: 0.7rem;
   color: var(--ink-faded);
@@ -456,6 +480,7 @@ html.dark .scale-select {
 }
 
 .chord-chip {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -466,9 +491,10 @@ html.dark .scale-select {
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--ink);
-  cursor: pointer;
-  transition: all 0.15s ease;
+  cursor: grab;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
   user-select: none;
+  touch-action: none;
 }
 
 .chord-chip:hover {
@@ -479,6 +505,50 @@ html.dark .scale-select {
   background: var(--ink);
   color: var(--cream);
   border-color: var(--ink);
+}
+
+.chord-chip.dragging {
+  opacity: 0.2;
+  cursor: grabbing;
+}
+
+.chord-chip.drop-before::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--red);
+  border-radius: 1px;
+}
+
+.chord-chip.drop-after::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--red);
+  border-radius: 1px;
+}
+
+.drag-ghost {
+  position: fixed;
+  z-index: 999;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.6rem;
+  background: var(--ink);
+  color: var(--cream);
+  border: 1px solid var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.9;
+  white-space: nowrap;
 }
 
 .chip-remove {
@@ -582,6 +652,182 @@ html.dark .scale-select {
   cursor: pointer;
 }
 
+/* ── Progression Settings Row ── */
+.progression-settings {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--rule);
+}
+
+.setting-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.setting-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faded);
+}
+
+.setting-select {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.3rem 0.5rem;
+  background: var(--card-bg);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235a4f3f' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.4rem center;
+  padding-right: 1.4rem;
+}
+
+html.dark .setting-select {
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b5e42' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+.setting-toggle {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.3rem 0.6rem;
+  background: none;
+  border: 1px solid var(--rule);
+  color: var(--ink-faded);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.setting-toggle:hover {
+  color: var(--ink);
+  border-color: var(--ink-faded);
+}
+
+.setting-toggle.active {
+  background: var(--ink);
+  color: var(--cream);
+  border-color: var(--ink);
+}
+
+/* ── Generate Section ── */
+.generate-section {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--rule);
+}
+
+.generate-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.style-input {
+  flex: 1;
+  min-width: 160px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.45rem 0.6rem;
+  background: var(--card-bg);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.style-input::placeholder {
+  color: var(--ink-faded);
+  opacity: 0.7;
+}
+
+.style-input:focus {
+  border-color: var(--ink-faded);
+}
+
+.generate-btn {
+  background: var(--red);
+  white-space: nowrap;
+}
+
+.generate-output {
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.generate-output.visible {
+  display: flex;
+}
+
+.generate-status {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-faded);
+  letter-spacing: 0.05em;
+}
+
+.generate-status.active {
+  animation: pulse 1.5s ease infinite;
+}
+
+.generate-status.error {
+  color: var(--red);
+}
+
+.generate-player {
+  display: none;
+  height: 36px;
+  max-width: 300px;
+  flex: 1;
+}
+
+.generate-player.visible {
+  display: block;
+}
+
+.download-btn {
+  display: none;
+  background: none;
+  color: var(--ink-faded);
+  border: 1px solid var(--rule);
+  text-decoration: none;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.download-btn.visible {
+  display: inline-block;
+}
+
+.download-btn:hover {
+  color: var(--ink);
+  border-color: var(--ink-faded);
+}
+
 /* ═══════════════════════════════════════════
    Loading State
    ═══════════════════════════════════════════ */
@@ -609,6 +855,11 @@ html.dark .scale-select {
   .scale-label { font-size: 1.1rem; }
   .chord-grid { font-size: 0.85rem; }
   .bpm-control { margin-left: 0; width: 100%; margin-top: 0.5rem; }
+  .progression-settings { gap: 0.75rem; }
+  .generate-row { flex-direction: column; align-items: stretch; }
+  .style-input { min-width: 0; }
+  .generate-output { flex-direction: column; align-items: stretch; }
+  .generate-player { max-width: 100%; }
 }
 
 @media (max-width: 480px) {
@@ -659,6 +910,7 @@ html.dark .scale-select {
       <div class="diagram-svg-wrap" id="diagramSvg"></div>
     </div>
     <div class="diagram-notes" id="diagramNotes"></div>
+    <button class="add-to-progression" id="addToProgression">+ Add to Progression</button>
   </section>
 
   <!-- Progression Builder -->
@@ -674,9 +926,51 @@ html.dark .scale-select {
         <input type="range" class="bpm-slider" id="bpmSlider" min="40" max="200" value="100">
       </div>
     </div>
+    <div class="progression-settings">
+      <div class="setting-group">
+        <span class="setting-label">Time</span>
+        <select class="setting-select" id="timeSigSelect">
+          <option value="4/4" selected>4/4</option>
+          <option value="3/4">3/4</option>
+          <option value="6/8">6/8</option>
+        </select>
+      </div>
+      <div class="setting-group">
+        <span class="setting-label">Play</span>
+        <select class="setting-select" id="playTypeSelect">
+          <option value="strum" selected>Strum</option>
+          <option value="arpeggio">Arpeggio</option>
+        </select>
+      </div>
+      <div class="setting-group">
+        <span class="setting-label">Loop</span>
+        <button class="setting-toggle" id="loopToggle">Off</button>
+      </div>
+      <div class="setting-group">
+        <span class="setting-label">Metronome</span>
+        <button class="setting-toggle" id="metronomeToggle">Off</button>
+      </div>
+    </div>
+    <div class="generate-section" id="generateSection">
+      <div class="generate-row">
+        <input type="text" class="style-input" id="styleInput" placeholder="Style: acoustic folk, jazz trio, lo-fi beats...">
+        <select class="setting-select" id="durationSelect">
+          <option value="8">8 sec</option>
+          <option value="15" selected>15 sec</option>
+          <option value="30">30 sec</option>
+        </select>
+        <button class="ctrl-btn generate-btn" id="generateBtn" disabled>Generate Track</button>
+      </div>
+      <div class="generate-output" id="generateOutput">
+        <span class="generate-status" id="generateStatus"></span>
+        <audio class="generate-player" id="generatePlayer" controls></audio>
+        <a class="ctrl-btn download-btn" id="downloadBtn" download="backing-track.mp3">Download</a>
+      </div>
+    </div>
   </section>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.min.js"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════════
@@ -853,10 +1147,28 @@ const MusicTheory = (() => {
     return degrees;
   }
 
+  // Convert progression to MusicGen-Chord format: "C A:min F G:7"
+  const MUSICGEN_QUALITY_MAP = {
+    'maj': '', 'min': 'min', 'dim': 'dim', 'aug': 'aug',
+    'sus2': 'sus2', 'sus4': 'sus4',
+    'maj7': 'maj7', 'min7': 'min7', 'dom7': '7',
+    'm7b5': 'hdim7', 'dim7': 'dim7',
+    'minMaj7': 'minmaj7', 'augMaj7': 'maj7', 'aug7': '7',
+  };
+
+  function toMusicGenChords(progression) {
+    return progression.map(chord => {
+      const root = NOTE_NAMES[chord.pc];
+      const type = MUSICGEN_QUALITY_MAP[chord.quality] || '';
+      return type ? `${root}:${type}` : root;
+    }).join(' ');
+  }
+
   return {
     NOTE_NAMES, SCALES, SCALE_GROUPS, CHORD_FORMULAS, ROMAN,
     getRootName, getScaleNoteNames, getScalePitchClasses,
     buildGrid, chordSuffix, getTriadQuality, get7thQuality,
+    toMusicGenChords,
   };
 })();
 
@@ -1059,6 +1371,10 @@ const AudioEngine = (() => {
   let loading = false;
   let onLoadCallback = null;
 
+  // Metronome click synths
+  let clickHi = null; // accent beat
+  let clickLo = null; // regular beat
+
   function init(onLoad) {
     if (loaded) { onLoad?.(); return; }
     if (loading) { onLoadCallback = onLoad; return; }
@@ -1091,6 +1407,29 @@ const AudioEngine = (() => {
     if (!loaded) {
       return new Promise(resolve => { init(resolve); });
     }
+    // Lazy-init metronome synths
+    if (!clickHi) {
+      clickHi = new Tone.Synth({
+        oscillator: { type: 'sine' },
+        envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.01 },
+        volume: -10,
+      }).toDestination();
+    }
+    if (!clickLo) {
+      clickLo = new Tone.Synth({
+        oscillator: { type: 'sine' },
+        envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.01 },
+        volume: -16,
+      }).toDestination();
+    }
+  }
+
+  function scheduleClick(time, accent) {
+    if (accent) {
+      clickHi.triggerAttackRelease('G5', '32n', time);
+    } else {
+      clickLo.triggerAttackRelease('C5', '32n', time);
+    }
   }
 
   // Strum a chord (array of MIDI notes, some may be null)
@@ -1106,13 +1445,18 @@ const AudioEngine = (() => {
     });
   }
 
+  // Compensation for sample attack latency vs synth clicks.
+  // Guitar samples have ~35ms of ramp before the perceived attack.
+  const SAMPLE_ANTICIPATION = 0.035;
+
   // Schedule a chord for progression playback
   function scheduleChord(midiNotes, time) {
     const notes = midiNotes.filter(n => n !== null);
     const strumDelay = 0.018;
+    const t0 = time - SAMPLE_ANTICIPATION;
     notes.forEach((midi, i) => {
       sampler.triggerAttackRelease(
-        VoicingEngine.midiToNoteName(midi), '2n', time + i * strumDelay
+        VoicingEngine.midiToNoteName(midi), '2n', t0 + i * strumDelay
       );
     });
   }
@@ -1120,7 +1464,7 @@ const AudioEngine = (() => {
   function isLoaded() { return loaded; }
   function getSampler() { return sampler; }
 
-  return { init, ensureReady, strumChord, scheduleChord, isLoaded, getSampler };
+  return { init, ensureReady, strumChord, scheduleChord, scheduleClick, isLoaded, getSampler };
 })();
 
 
@@ -1136,6 +1480,14 @@ const AppState = (() => {
     bpm: 100,
     isPlaying: false,
     darkMode: false,
+    loop: false,
+    playType: 'strum',   // 'strum' or 'arpeggio'
+    timeSig: '4/4',      // '4/4', '3/4', '6/8'
+    metronome: false,
+    generateStatus: 'idle', // 'idle' | 'generating' | 'done' | 'error'
+    generateStyle: '',
+    generatedTrackUrl: null,
+    generateDuration: 15,
   };
 
   const listeners = new Set();
@@ -1313,12 +1665,7 @@ const ChordGrid = (() => {
     const midi = VoicingEngine.fretsToMidi(frets);
     const chord = { degree, quality, name, frets, midi, pc };
 
-    // Batch update: set active chord + add to progression in one go
-    const { progression } = AppState.get();
-    AppState.set({
-      activeChord: chord,
-      progression: [...progression, { name, quality, frets, midi, pc }],
-    });
+    AppState.set({ activeChord: chord });
 
     // Play chord
     AudioEngine.strumChord(midi);
@@ -1337,6 +1684,7 @@ const DiagramDisplay = (() => {
   const qualityEl = document.getElementById('diagramQuality');
   const svgEl = document.getElementById('diagramSvg');
   const notesEl = document.getElementById('diagramNotes');
+  const addBtn = document.getElementById('addToProgression');
 
   function update(state) {
     const { activeChord } = state;
@@ -1358,6 +1706,14 @@ const DiagramDisplay = (() => {
     notesEl.textContent = noteNames.join(' \u2013 ');
   }
 
+  // Add active chord to progression
+  addBtn.addEventListener('click', () => {
+    const { activeChord, progression } = AppState.get();
+    if (!activeChord) return;
+    const { name, quality, frets, midi, pc } = activeChord;
+    AppState.set({ progression: [...progression, { name, quality, frets, midi, pc }] });
+  });
+
   return { update };
 })();
 
@@ -1372,9 +1728,61 @@ const ProgressionBuilder = (() => {
   const clearBtn = document.getElementById('clearBtn');
   const bpmSlider = document.getElementById('bpmSlider');
   const bpmLabel = document.getElementById('bpmLabel');
+  const timeSigSelect = document.getElementById('timeSigSelect');
+  const playTypeSelect = document.getElementById('playTypeSelect');
+  const loopToggle = document.getElementById('loopToggle');
+  const metronomeToggle = document.getElementById('metronomeToggle');
 
   let playbackIndex = -1;
   let scheduledEvents = [];
+
+  // ─── Drag-and-drop state ───
+  let dragState = null;
+  let suppressClick = false;
+
+  // ─── Time signature helpers ───
+  // Tone.js Transport.timeSignature = quarter notes per bar.
+  // [6,8] reduces to 3 (three quarter-note beats = six eighth-note beats).
+  // For 6/8 we schedule eighth-note beats using sub-beat positions.
+  function getTimeSigConfig(timeSig) {
+    switch (timeSig) {
+      case '3/4': return { toneTimeSig: 3, beatsPerBar: 3, beatDuration: '4n' };
+      case '6/8': return { toneTimeSig: [6, 8], beatsPerBar: 6, beatDuration: '8n' };
+      default:    return { toneTimeSig: 4, beatsPerBar: 4, beatDuration: '4n' };
+    }
+  }
+
+  // Convert logical (bar, beatIndex) to transport time string.
+  // For 4/4 and 3/4: each beat = 1 quarter note → "bar:beat:0"
+  // For 6/8: 6 eighth-note beats across 3 quarter-note Transport beats
+  //   beat 0 → bar:0:0, beat 1 → bar:0:2, beat 2 → bar:1:0,
+  //   beat 3 → bar:1:2, beat 4 → bar:2:0, beat 5 → bar:2:2
+  function beatTime(bar, beatIdx, timeSig) {
+    if (timeSig === '6/8') {
+      const qBeat = Math.floor(beatIdx / 2);
+      const sub = (beatIdx % 2) * 2; // 0 or 2 sixteenths
+      return `${bar}:${qBeat}:${sub}`;
+    }
+    return `${bar}:${beatIdx}:0`;
+  }
+
+  // ─── Arpeggio pattern helper ───
+  function getArpeggioPattern(midiNotes, timeSig) {
+    const notes = midiNotes.filter(n => n !== null).sort((a, b) => a - b);
+    if (notes.length === 0) return [];
+    const n = notes.length;
+    const bass = notes[0];
+    const top = notes[n - 1];
+    const mid = notes[Math.floor(n / 2)];
+    const lo = notes[Math.floor(n / 3)];
+    const hi = notes[Math.floor(2 * n / 3)];
+
+    switch (timeSig) {
+      case '3/4': return [bass, mid, top];
+      case '6/8': return [bass, lo, mid, bass, hi, top];
+      default:    return [bass, mid, top, mid];
+    }
+  }
 
   function renderStrip() {
     const { progression, isPlaying } = AppState.get();
@@ -1404,8 +1812,130 @@ const ProgressionBuilder = (() => {
     strip.innerHTML = html;
   }
 
-  // Remove chip
+  // ─── Drag-and-drop helpers ───
+  function getDropIndex(clientX, clientY) {
+    const chips = [...strip.querySelectorAll('.chord-chip')];
+    const n = chips.length;
+    if (n === 0) return 0;
+
+    for (let i = 0; i < n; i++) {
+      const r = chips[i].getBoundingClientRect();
+      const midX = r.left + r.width / 2;
+      const midY = r.top + r.height / 2;
+      if (Math.abs(clientY - midY) > r.height) continue;
+      if (clientX < midX) return i;
+    }
+    return n;
+  }
+
+  function clearDropIndicator() {
+    strip.querySelectorAll('.drop-before,.drop-after').forEach(el => {
+      el.classList.remove('drop-before', 'drop-after');
+    });
+  }
+
+  function showDropIndicator(dropIdx) {
+    clearDropIndicator();
+    if (!dragState) return;
+    const dragIdx = dragState.index;
+    if (dropIdx === dragIdx || dropIdx === dragIdx + 1) return;
+
+    const chips = strip.querySelectorAll('.chord-chip');
+    if (dropIdx < chips.length) {
+      chips[dropIdx].classList.add('drop-before');
+    } else if (chips.length > 0) {
+      chips[chips.length - 1].classList.add('drop-after');
+    }
+  }
+
+  // ─── Pointer event handlers ───
+  function onPointerDown(e) {
+    if (AppState.get().isPlaying) return;
+    if (e.target.closest('.chip-remove')) return;
+    const chip = e.target.closest('.chord-chip');
+    if (!chip) return;
+
+    const rect = chip.getBoundingClientRect();
+    dragState = {
+      index: parseInt(chip.dataset.index),
+      startX: e.clientX,
+      startY: e.clientY,
+      offsetX: e.clientX - rect.left,
+      offsetY: e.clientY - rect.top,
+      chip,
+      ghost: null,
+      active: false,
+      dropIndex: parseInt(chip.dataset.index),
+    };
+
+    chip.setPointerCapture(e.pointerId);
+    chip.addEventListener('pointermove', onPointerMove);
+    chip.addEventListener('pointerup', onPointerUp);
+    chip.addEventListener('lostpointercapture', onPointerUp);
+  }
+
+  function onPointerMove(e) {
+    if (!dragState) return;
+
+    const dx = e.clientX - dragState.startX;
+    const dy = e.clientY - dragState.startY;
+
+    if (!dragState.active) {
+      if (Math.abs(dx) + Math.abs(dy) < 8) return;
+      dragState.active = true;
+
+      const ghost = document.createElement('div');
+      ghost.className = 'drag-ghost';
+      ghost.textContent = AppState.get().progression[dragState.index].name;
+      document.body.appendChild(ghost);
+      dragState.ghost = ghost;
+
+      dragState.chip.classList.add('dragging');
+    }
+
+    dragState.ghost.style.left = (e.clientX - dragState.offsetX) + 'px';
+    dragState.ghost.style.top = (e.clientY - dragState.offsetY) + 'px';
+
+    const dropIdx = getDropIndex(e.clientX, e.clientY);
+    dragState.dropIndex = dropIdx;
+    showDropIndicator(dropIdx);
+  }
+
+  function onPointerUp(e) {
+    if (!dragState) return;
+
+    const ds = dragState;
+    ds.chip.removeEventListener('pointermove', onPointerMove);
+    ds.chip.removeEventListener('pointerup', onPointerUp);
+    ds.chip.removeEventListener('lostpointercapture', onPointerUp);
+
+    if (ds.active) {
+      ds.ghost.remove();
+      ds.chip.classList.remove('dragging');
+      clearDropIndicator();
+      suppressClick = true;
+
+      const from = ds.index;
+      const to = ds.dropIndex;
+      if (to !== from && to !== from + 1) {
+        const { progression } = AppState.get();
+        const newProg = [...progression];
+        const [moved] = newProg.splice(from, 1);
+        const insertAt = to > from ? to - 1 : to;
+        newProg.splice(insertAt, 0, moved);
+        AppState.set({ progression: newProg });
+      }
+    }
+
+    dragState = null;
+  }
+
+  strip.addEventListener('pointerdown', onPointerDown);
+
+  // Remove chip / replay chip
   strip.addEventListener('click', (e) => {
+    if (suppressClick) { suppressClick = false; return; }
+
     const removeBtn = e.target.closest('.chip-remove');
     if (removeBtn) {
       e.stopPropagation();
@@ -1417,7 +1947,6 @@ const ProgressionBuilder = (() => {
       return;
     }
 
-    // Click chip to replay
     const chip = e.target.closest('.chord-chip');
     if (chip && !AppState.get().isPlaying) {
       const idx = parseInt(chip.dataset.index);
@@ -1438,52 +1967,135 @@ const ProgressionBuilder = (() => {
     }
   });
 
-  // Play progression
-  playBtn.addEventListener('click', async () => {
-    const { progression, bpm } = AppState.get();
+  // ─── Settings controls ───
+  timeSigSelect.addEventListener('change', () => {
+    AppState.set({ timeSig: timeSigSelect.value });
+    if (AppState.get().isPlaying) { startPlayback(); }
+  });
+
+  playTypeSelect.addEventListener('change', () => {
+    AppState.set({ playType: playTypeSelect.value });
+    if (AppState.get().isPlaying) { startPlayback(); }
+  });
+
+  loopToggle.addEventListener('click', () => {
+    const newLoop = !AppState.get().loop;
+    AppState.set({ loop: newLoop });
+    loopToggle.textContent = newLoop ? 'On' : 'Off';
+    loopToggle.classList.toggle('active', newLoop);
+    // Update loop live without restart
+    if (AppState.get().isPlaying) {
+      Tone.Transport.loop = newLoop;
+    }
+  });
+
+  metronomeToggle.addEventListener('click', () => {
+    const newMet = !AppState.get().metronome;
+    AppState.set({ metronome: newMet });
+    metronomeToggle.textContent = newMet ? 'On' : 'Off';
+    metronomeToggle.classList.toggle('active', newMet);
+    if (AppState.get().isPlaying) { startPlayback(); }
+  });
+
+  // ─── Playback ───
+  async function startPlayback() {
+    const { progression, bpm, timeSig, playType, loop, metronome } = AppState.get();
     if (progression.length === 0) return;
 
     await AudioEngine.ensureReady();
-    stopPlayback();
+
+    // Clean up any existing playback
+    Tone.Transport.stop();
+    Tone.Transport.cancel();
+    scheduledEvents = [];
+    playbackIndex = -1;
 
     AppState.set({ isPlaying: true });
 
-    Tone.Transport.cancel();
-    Tone.Transport.stop();
+    const config = getTimeSigConfig(timeSig);
     Tone.Transport.bpm.value = bpm;
+    Tone.Transport.timeSignature = config.toneTimeSig;
     Tone.Transport.position = 0;
 
-    // Schedule each chord using bar notation (e.g. "0:0:0", "1:0:0", etc.)
-    progression.forEach((chord, i) => {
-      const eventId = Tone.Transport.schedule((t) => {
-        AudioEngine.scheduleChord(chord.midi, t);
-        Tone.Draw.schedule(() => {
-          playbackIndex = i;
-          renderStrip();
-        }, t);
-      }, `${i}:0:0`);
-      scheduledEvents.push(eventId);
+    const totalBars = progression.length;
+
+    // Loop configuration
+    Tone.Transport.loop = loop;
+    if (loop) {
+      Tone.Transport.loopStart = '0:0:0';
+      Tone.Transport.loopEnd = `${totalBars}:0:0`;
+    }
+
+    // Schedule chords
+    progression.forEach((chord, bar) => {
+      if (playType === 'arpeggio') {
+        // Arpeggio: schedule individual notes across beats
+        const pattern = getArpeggioPattern(chord.midi, timeSig);
+        pattern.forEach((midi, beatIdx) => {
+          const time = beatTime(bar, beatIdx, timeSig);
+          const eventId = Tone.Transport.schedule((t) => {
+            const t0 = t - 0.035; // sample anticipation
+            AudioEngine.getSampler().triggerAttackRelease(
+              VoicingEngine.midiToNoteName(midi), config.beatDuration, t0
+            );
+            if (beatIdx === 0) {
+              Tone.Draw.schedule(() => {
+                playbackIndex = bar;
+                renderStrip();
+              }, t);
+            }
+          }, time);
+          scheduledEvents.push(eventId);
+        });
+      } else {
+        // Strum: all notes at beat 0 with strum delay
+        const eventId = Tone.Transport.schedule((t) => {
+          AudioEngine.scheduleChord(chord.midi, t);
+          Tone.Draw.schedule(() => {
+            playbackIndex = bar;
+            renderStrip();
+          }, t);
+        }, `${bar}:0:0`);
+        scheduledEvents.push(eventId);
+      }
     });
 
-    // Schedule stop after last chord (give it 1 bar to ring out)
-    const stopEvent = Tone.Transport.schedule((t) => {
-      Tone.Draw.schedule(() => {
-        stopPlayback();
-      }, t);
-    }, `${progression.length}:0:0`);
-    scheduledEvents.push(stopEvent);
+    // Metronome clicks
+    if (metronome) {
+      for (let bar = 0; bar < totalBars; bar++) {
+        for (let beatIdx = 0; beatIdx < config.beatsPerBar; beatIdx++) {
+          // Accent: beat 0 always, plus beat 3 in 6/8 (compound grouping)
+          const accent = beatIdx === 0 || (timeSig === '6/8' && beatIdx === 3);
+          const time = beatTime(bar, beatIdx, timeSig);
+          const eventId = Tone.Transport.schedule((t) => {
+            AudioEngine.scheduleClick(t, accent);
+          }, time);
+          scheduledEvents.push(eventId);
+        }
+      }
+    }
+
+    // Stop event (only when not looping)
+    if (!loop) {
+      const stopEvent = Tone.Transport.schedule((t) => {
+        Tone.Draw.schedule(() => {
+          stopPlayback();
+        }, t);
+      }, `${totalBars}:0:0`);
+      scheduledEvents.push(stopEvent);
+    }
 
     Tone.Transport.start();
-  });
+  }
 
-  // Stop
-  stopBtn.addEventListener('click', () => {
-    stopPlayback();
-  });
+  playBtn.addEventListener('click', () => { startPlayback(); });
+
+  stopBtn.addEventListener('click', () => { stopPlayback(); });
 
   function stopPlayback() {
     Tone.Transport.stop();
     Tone.Transport.cancel();
+    Tone.Transport.loop = false;
     scheduledEvents = [];
     playbackIndex = -1;
     AppState.set({ isPlaying: false });
@@ -1496,6 +2108,129 @@ const ProgressionBuilder = (() => {
   });
 
   return { renderStrip, stopPlayback };
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════
+   8b. GENERATE TRACK (AI Backing Track via Replicate)
+   ═══════════════════════════════════════════════════════════════ */
+const GenerateTrack = (() => {
+  const SUPABASE_URL = 'https://fttxbataepqrrryhggot.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_VpfqFJz4Y6mJGxDZb06dYg_GG3psxZh';
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const generateBtn = document.getElementById('generateBtn');
+  const styleInput = document.getElementById('styleInput');
+  const durationSelect = document.getElementById('durationSelect');
+  const generateOutput = document.getElementById('generateOutput');
+  const generateStatus = document.getElementById('generateStatus');
+  const generatePlayer = document.getElementById('generatePlayer');
+  const downloadBtn = document.getElementById('downloadBtn');
+
+  function updateUI() {
+    const { progression, generateStatus: status, generatedTrackUrl } = AppState.get();
+
+    // Enable button only when progression exists and not generating
+    generateBtn.disabled = progression.length === 0 || status === 'generating';
+    generateBtn.textContent = status === 'generating' ? 'Generating...' : 'Generate Track';
+
+    // Show output area when not idle
+    generateOutput.classList.toggle('visible', status !== 'idle');
+
+    // Status text
+    const statusEl = document.getElementById('generateStatus');
+    statusEl.classList.remove('active', 'error');
+    if (status === 'generating') {
+      statusEl.textContent = 'Generating backing track...';
+      statusEl.classList.add('active');
+    } else if (status === 'error') {
+      statusEl.textContent = 'Generation failed. Try again.';
+      statusEl.classList.add('error');
+    } else if (status === 'done') {
+      statusEl.textContent = 'Track ready';
+    } else {
+      statusEl.textContent = '';
+    }
+
+    // Audio player
+    generatePlayer.classList.toggle('visible', status === 'done' && !!generatedTrackUrl);
+    if (status === 'done' && generatedTrackUrl && generatePlayer.src !== generatedTrackUrl) {
+      generatePlayer.src = generatedTrackUrl;
+    }
+
+    // Download button
+    downloadBtn.classList.toggle('visible', status === 'done' && !!generatedTrackUrl);
+    if (generatedTrackUrl) {
+      downloadBtn.href = generatedTrackUrl;
+    }
+  }
+
+  // Style input sync
+  styleInput.addEventListener('input', () => {
+    AppState.set({ generateStyle: styleInput.value });
+  });
+
+  // Duration sync
+  durationSelect.addEventListener('change', () => {
+    AppState.set({ generateDuration: parseInt(durationSelect.value) });
+  });
+
+  // Generate button
+  generateBtn.addEventListener('click', async () => {
+    const { progression, bpm, timeSig, generateStyle, generateDuration } = AppState.get();
+    if (progression.length === 0) return;
+
+    // Check auth
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      // Show sign-in prompt
+      AppState.set({ generateStatus: 'error' });
+      const statusEl = document.getElementById('generateStatus');
+      generateOutput.classList.add('visible');
+      statusEl.textContent = 'Sign in with Google to generate tracks';
+      statusEl.classList.remove('active');
+      statusEl.classList.add('error');
+      return;
+    }
+
+    AppState.set({ generateStatus: 'generating', generatedTrackUrl: null });
+
+    const chords = MusicTheory.toMusicGenChords(progression);
+
+    try {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/generate-track`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chords,
+          bpm,
+          timeSig,
+          style: generateStyle || 'acoustic backing track',
+          duration: generateDuration,
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      AppState.set({ generateStatus: 'done', generatedTrackUrl: data.audio_url });
+    } catch (e) {
+      console.error('Generate track error:', e);
+      AppState.set({ generateStatus: 'error' });
+    }
+  });
+
+  // Subscribe to state changes
+  AppState.subscribe(updateUI);
+
+  return { updateUI };
 })();
 
 
@@ -1596,6 +2331,7 @@ const App = (() => {
     ChordGrid.render();
     DiagramDisplay.update(AppState.get());
     ProgressionBuilder.renderStrip();
+    GenerateTrack.updateUI();
   }
 
   return { init };
